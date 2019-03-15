@@ -13,8 +13,8 @@ import cv2
 import numpy as np
 
 #Función para realizar gradiente automático
-#Recibe la imagen a convertir, sigma = 0.33 no recuerdo porque
-def AutoCanny(image, sigma=0.33):
+#Recibe la imagen a convertir, sigma = 0.33 no recuerdo porque, probar con 0
+def AutoCanny(image, sigma=0):
     
     #Obtiene la media de la intensidad de los pixeles en la imagen
     v = np.median(image)
@@ -44,13 +44,25 @@ def SelectImage():
         image = cv2.imread(path)
 
         #Conversión de la imagen a escala de grises
+        #1
         grayImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         #Imagen difuminada
-        blurImage = cv2.GaussianBlur(grayImage, (3, 3), 0)
+        #Limpia el ruido en la imagen
+        blurImage = cv2.GaussianBlur(grayImage, (5, 5), 0)
 
         #Transformar imagen a solo bordes
         edgedImage = AutoCanny(blurImage)
+
+        #Copia de imagen de contornos, el próximo método modifica la imagen, por eso se hace una copia
+        edgedImageCp = edgedImage
+
+        #Retorna una lista de los contornos de los objetos 
+        (contornos,_) = cv2.findContours(edgedImage.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        #Dibuja los contornos econtrados sobre la imagen original
+        cv2.drawContours(image, contornos, -1,(0,0,255), 2)
+        
         
         #OpenCV representa colores en BGR, PIL en RGB, conversión necesaria para imagen original
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
